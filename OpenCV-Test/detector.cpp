@@ -47,3 +47,20 @@ const char* Detector::getTag() {
 void Detector::setMinSize(cv::Size size) {
     minSize = size;
 }
+
+void Detector::setScaleFactor(int scale) {
+    scaleFactor = scale;
+}
+
+void Detector::setMinNeighbours(int n) {
+    minNeighbours = n;
+}
+
+
+
+
+
+
+
+
+

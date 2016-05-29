@@ -27,6 +27,8 @@ public:
     std::vector<cv::Rect> detect(cv::Mat image);
     const char* getTag();
     void setMinSize(cv::Size size);
+    void setScaleFactor(int scale);
+    void setMinNeighbours(int n);
 
 private:
     cv::CascadeClassifier cascadeClassifier;
