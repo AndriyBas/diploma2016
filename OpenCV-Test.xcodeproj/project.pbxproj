@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		C7C1DCCF1CE11AC300B6632C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7C1DCCE1CE11AC300B6632C /* main.cpp */; };
+		C7C1DCD71CE13A7B00B6632C /* cascade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7C1DCD51CE13A7B00B6632C /* cascade.cpp */; };
+		C7F92EC41CFB0EF800D76D55 /* detector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7F92EC21CFB0EF800D76D55 /* detector.cpp */; };
+		C7F92EC71CFB192E00D76D55 /* detect_cascade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7F92EC51CFB192E00D76D55 /* detect_cascade.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,12 @@
 /* Begin PBXFileReference section */
 		C7C1DCCB1CE11AC300B6632C /* OpenCV-Test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "OpenCV-Test"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7C1DCCE1CE11AC300B6632C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C7C1DCD51CE13A7B00B6632C /* cascade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cascade.cpp; sourceTree = "<group>"; };
+		C7C1DCD61CE13A7B00B6632C /* cascade.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cascade.hpp; sourceTree = "<group>"; };
+		C7F92EC21CFB0EF800D76D55 /* detector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = detector.cpp; sourceTree = "<group>"; };
+		C7F92EC31CFB0EF800D76D55 /* detector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = detector.hpp; sourceTree = "<group>"; };
+		C7F92EC51CFB192E00D76D55 /* detect_cascade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = detect_cascade.cpp; sourceTree = "<group>"; };
+		C7F92EC61CFB192E00D76D55 /* detect_cascade.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = detect_cascade.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +67,12 @@
 			isa = PBXGroup;
 			children = (
 				C7C1DCCE1CE11AC300B6632C /* main.cpp */,
+				C7C1DCD51CE13A7B00B6632C /* cascade.cpp */,
+				C7C1DCD61CE13A7B00B6632C /* cascade.hpp */,
+				C7F92EC31CFB0EF800D76D55 /* detector.hpp */,
+				C7F92EC21CFB0EF800D76D55 /* detector.cpp */,
+				C7F92EC61CFB192E00D76D55 /* detect_cascade.hpp */,
+				C7F92EC51CFB192E00D76D55 /* detect_cascade.cpp */,
 			);
 			path = "OpenCV-Test";
 			sourceTree = "<group>";
@@ -118,7 +133,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7C1DCD71CE13A7B00B6632C /* cascade.cpp in Sources */,
+				C7F92EC41CFB0EF800D76D55 /* detector.cpp in Sources */,
 				C7C1DCCF1CE11AC300B6632C /* main.cpp in Sources */,
+				C7F92EC71CFB192E00D76D55 /* detect_cascade.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +227,30 @@
 		C7C1DCD31CE11AC300B6632C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-lopencv_calib3d",
+					"-lopencv_core",
+					"-lopencv_features2d",
+					"-lopencv_flann",
+					"-lopencv_highgui",
+					"-lopencv_imgcodecs",
+					"-lopencv_imgproc",
+					"-lopencv_ml",
+					"-lopencv_objdetect",
+					"-lopencv_photo",
+					"-lopencv_shape",
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_ts",
+					"-lopencv_video",
+					"-lopencv_videoio",
+					"-lopencv_videostab",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -216,6 +258,30 @@
 		C7C1DCD41CE11AC300B6632C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				OTHER_LDFLAGS = (
+					"-lopencv_calib3d",
+					"-lopencv_core",
+					"-lopencv_features2d",
+					"-lopencv_flann",
+					"-lopencv_highgui",
+					"-lopencv_imgcodecs",
+					"-lopencv_imgproc",
+					"-lopencv_ml",
+					"-lopencv_objdetect",
+					"-lopencv_photo",
+					"-lopencv_shape",
+					"-lopencv_stitching",
+					"-lopencv_superres",
+					"-lopencv_ts",
+					"-lopencv_video",
+					"-lopencv_videoio",
+					"-lopencv_videostab",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -239,6 +305,7 @@
 				C7C1DCD41CE11AC300B6632C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
