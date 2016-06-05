@@ -15,21 +15,7 @@
 #include <stdio.h>
 
 #include "detector.hpp"
-
-
-struct DetectResult {
-    const char* tag;
-    cv::Rect rect;
-    
-    DetectResult(const char* tagArg, const cv::Rect objectRect) {
-        tag = tagArg;
-        rect.width = objectRect.width;
-        rect.height = objectRect.height;
-        rect.x = objectRect.x;
-        rect.y = objectRect.y;
-    }
-};
-
+#include "base_video_classifier.hpp"
 
 class DetectCascade {
     
@@ -40,7 +26,7 @@ public:
     // methods
     void addDetector(Detector detector);
     
-    std::vector<DetectResult> detect(cv::Mat image);
+    DetectedResults detect(cv::Mat image);
     
 private:
     std::vector<Detector> detectors;

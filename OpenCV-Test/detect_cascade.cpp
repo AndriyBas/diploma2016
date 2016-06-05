@@ -15,7 +15,7 @@ DetectCascade::DetectCascade() {
 
 
 // methods
-std::vector<DetectResult> DetectCascade::detect(cv::Mat image) {
+DetectedResults DetectCascade::detect(cv::Mat image) {
     
     std::vector<DetectResult> result;
     

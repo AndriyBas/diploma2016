@@ -11,6 +11,7 @@
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/opencv.hpp>
 
 #include <iostream>
 #include <stdio.h>
@@ -54,8 +55,22 @@ void drawTags(cv::Mat image, std::vector<DetectResult> objects);
 int main( )
 {
     // init input video source
+//    cvCaptureFromFile
+    
+//    cv::VideoCapture captureInput("/Users/andriybas/Downloads/elephant_wild_life.m4v");
+//    cv::VideoCapture captureInput("/Users/andriybas/Documents/test.mov");
     cv::VideoCapture captureInput(0);
-    cv::namedWindow("window1", 1 );
+    
+    if (!captureInput.isOpened()) {
+        std::cout << "Could not open input source" << std::endl;
+        return -1;
+    }
+    
+    double fps = captureInput.get(CV_CAP_PROP_FPS); //get the frames per seconds of the video
+    
+    std::cout << "Frame per seconds : " << fps << std::endl;
+    
+    cv::namedWindow("window1", CV_WINDOW_AUTOSIZE);
     
     
     int frameCount = 0;
@@ -70,7 +85,11 @@ int main( )
     // creating detectors
     Detector faceDetector(face_classifier, "face");
     Detector faceProfileDetector(profile_face_classifier, "face_profile");
+    
     Detector elephantDetector(elephant_classifier, "elephant");
+    elephantDetector.setScaleFactor(3);
+    elephantDetector.setMinNeighbours(4);
+    
     
     Detector bananaDetector(banana_classifier, "banana");
     bananaDetector.setScaleFactor(2);
@@ -80,10 +99,10 @@ int main( )
     DetectCascade detectCascade;
 //    detectCascade.addDetector(faceDetector);
 //    detectCascade.addDetector(faceProfileDetector);
-//    detectCascade.addDetector(elephantDetector);
-    detectCascade.addDetector(bananaDetector);
+    detectCascade.addDetector(elephantDetector);
+//    detectCascade.addDetector(bananaDetector);
     
-    std::vector<DetectResult> detectedObjects;
+    DetectedResults detectedObjects;
     cv::Mat frame;
     
     while(true)
@@ -131,6 +150,9 @@ void drawTags(cv::Mat image, std::vector<DetectResult> detectedObjects) {
         tags.append(detectedObjects[0].tag);
     }
     cv::putText(image, tags.c_str(), cv::Point(10, 20), CV_FONT_HERSHEY_PLAIN, 1.3, TEXT_COLOR, 1);
+    if (tags.length() > 0) {
+        std::cout << "tags : " << tags << std::endl;
+    }
 }
 
 

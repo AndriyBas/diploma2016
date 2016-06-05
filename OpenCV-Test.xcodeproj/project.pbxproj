@@ -7,8 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C7806E131D04CF6E0068A5CF /* base_video_classifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7806E111D04CF6E0068A5CF /* base_video_classifier.cpp */; };
+		C7806E161D04CF790068A5CF /* base_detector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7806E141D04CF790068A5CF /* base_detector.cpp */; };
 		C7C1DCCF1CE11AC300B6632C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7C1DCCE1CE11AC300B6632C /* main.cpp */; };
 		C7C1DCD71CE13A7B00B6632C /* cascade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7C1DCD51CE13A7B00B6632C /* cascade.cpp */; };
+		C7F4510A1CFD354F003B1B53 /* video_classifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7F451081CFD354F003B1B53 /* video_classifier.cpp */; };
 		C7F92EC41CFB0EF800D76D55 /* detector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7F92EC21CFB0EF800D76D55 /* detector.cpp */; };
 		C7F92EC71CFB192E00D76D55 /* detect_cascade.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7F92EC51CFB192E00D76D55 /* detect_cascade.cpp */; };
 /* End PBXBuildFile section */
@@ -26,10 +29,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C7806E111D04CF6E0068A5CF /* base_video_classifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = base_video_classifier.cpp; sourceTree = "<group>"; };
+		C7806E121D04CF6E0068A5CF /* base_video_classifier.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = base_video_classifier.hpp; sourceTree = "<group>"; };
+		C7806E141D04CF790068A5CF /* base_detector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = base_detector.cpp; sourceTree = "<group>"; };
+		C7806E151D04CF790068A5CF /* base_detector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = base_detector.hpp; sourceTree = "<group>"; };
 		C7C1DCCB1CE11AC300B6632C /* OpenCV-Test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "OpenCV-Test"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7C1DCCE1CE11AC300B6632C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		C7C1DCD51CE13A7B00B6632C /* cascade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cascade.cpp; sourceTree = "<group>"; };
 		C7C1DCD61CE13A7B00B6632C /* cascade.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cascade.hpp; sourceTree = "<group>"; };
+		C7F451081CFD354F003B1B53 /* video_classifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = video_classifier.cpp; sourceTree = "<group>"; };
+		C7F451091CFD354F003B1B53 /* video_classifier.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = video_classifier.hpp; sourceTree = "<group>"; };
 		C7F92EC21CFB0EF800D76D55 /* detector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = detector.cpp; sourceTree = "<group>"; };
 		C7F92EC31CFB0EF800D76D55 /* detector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = detector.hpp; sourceTree = "<group>"; };
 		C7F92EC51CFB192E00D76D55 /* detect_cascade.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = detect_cascade.cpp; sourceTree = "<group>"; };
@@ -67,12 +76,18 @@
 			isa = PBXGroup;
 			children = (
 				C7C1DCCE1CE11AC300B6632C /* main.cpp */,
+				C7806E111D04CF6E0068A5CF /* base_video_classifier.cpp */,
+				C7806E121D04CF6E0068A5CF /* base_video_classifier.hpp */,
 				C7C1DCD51CE13A7B00B6632C /* cascade.cpp */,
 				C7C1DCD61CE13A7B00B6632C /* cascade.hpp */,
+				C7806E141D04CF790068A5CF /* base_detector.cpp */,
+				C7806E151D04CF790068A5CF /* base_detector.hpp */,
 				C7F92EC31CFB0EF800D76D55 /* detector.hpp */,
 				C7F92EC21CFB0EF800D76D55 /* detector.cpp */,
 				C7F92EC61CFB192E00D76D55 /* detect_cascade.hpp */,
 				C7F92EC51CFB192E00D76D55 /* detect_cascade.cpp */,
+				C7F451091CFD354F003B1B53 /* video_classifier.hpp */,
+				C7F451081CFD354F003B1B53 /* video_classifier.cpp */,
 			);
 			path = "OpenCV-Test";
 			sourceTree = "<group>";
@@ -133,10 +148,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7F4510A1CFD354F003B1B53 /* video_classifier.cpp in Sources */,
+				C7806E131D04CF6E0068A5CF /* base_video_classifier.cpp in Sources */,
 				C7C1DCD71CE13A7B00B6632C /* cascade.cpp in Sources */,
 				C7F92EC41CFB0EF800D76D55 /* detector.cpp in Sources */,
 				C7C1DCCF1CE11AC300B6632C /* main.cpp in Sources */,
 				C7F92EC71CFB192E00D76D55 /* detect_cascade.cpp in Sources */,
+				C7806E161D04CF790068A5CF /* base_detector.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

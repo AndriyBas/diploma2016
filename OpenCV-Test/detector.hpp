@@ -13,10 +13,11 @@
 #include "opencv2/highgui/highgui.hpp"
 
 #include <stdio.h>
+#include "base_detector.hpp"
 
 const cv::Size DETECT_DEFAULT_MIN_SIZE = cv::Size(30, 30);
 
-class Detector {
+class Detector : public BaseDetector {
 
 public:
     
@@ -24,11 +25,12 @@ public:
     Detector(cv::CascadeClassifier classifier, const char* tag);
     
     // methods
-    std::vector<cv::Rect> detect(cv::Mat image);
-    const char* getTag();
-    void setMinSize(cv::Size size);
-    void setScaleFactor(int scale);
-    void setMinNeighbours(int n);
+    virtual std::vector<cv::Rect> detect(cv::Mat image);
+    virtual const char* getTag();
+    virtual void setMinSize(cv::Size size);
+    virtual void setScaleFactor(int scale);
+    virtual void setMinNeighbours(int n);
+    
 
 private:
     cv::CascadeClassifier cascadeClassifier;
