@@ -35,11 +35,13 @@ std::string VideoClassifier::getVideoClass() {
     }
     
     bool b = foundSet.find("banana") != foundSet.end();
-    bool e = foundSet.find("face") != foundSet.end();
-    bool f = foundSet.find("elephant") != foundSet.end();
+    bool e = foundSet.find("elephant") != foundSet.end();
+    bool f = foundSet.find("face") != foundSet.end();
     
     if (b && e && f) {
         return "zoo";
+    } else if (b && e) {
+        return "wild life";
     }
     
     return "-";
