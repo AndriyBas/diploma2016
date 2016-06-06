@@ -1,22 +1,22 @@
 from getopt import getopt
-from sys import argv
 from os import listdir, path, makedirs, remove
 from re import sub
 from subprocess import check_call
-from time import sleep
 from shutil import rmtree, copytree
+from time import sleep
+from sys import argv
 
-DIR_TRAINING_DATA = "../Training/Images/"
-DIR_POS_IMAGES = DIR_TRAINING_DATA+"/positive-clean"
-DIR_POS_IMAGES_CROPPED = DIR_TRAINING_DATA+"/positive-clean-cropped"
-DIR_DATA = "data"
-DIR_NEG_IMAGES = DIR_DATA+"/negative-tutorial-haartraining"
-DIR_SAMPLE_IMAGES = DIR_DATA+"/positive-clean-cropped-samples"
-DIR_HAAR_DATA = DIR_DATA+"/clean-cropped-haardata"
+TRAIN_DIR = "../Pictures/"
+IMAGE_POS_DIR = TRAIN_DIR+"/positive-clean"
+IMAGE_POS_DIR_CROPPED = TRAIN_DIR+"/positive-clean-cropped"
+MAIN_DIR = "data"
+NEGATIVE_IMAGE_DIR = MAIN_DIR+"/negative-tutorial-haartraining"
+SAMPLE_IMAGES_DIR = MAIN_DIR+"/positive-clean-cropped-samples"
+HAAR_MAIN_DIR = MAIN_DIR+"/clean-cropped-haardata"
 
-FILE_NEG_COLLECTION = DIR_NEG_IMAGES+"/"+DIR_NEG_IMAGES.split("/")[-1]+".txt"
-FILE_SAMPLE_COLLECTION = DIR_SAMPLE_IMAGES+"/"+DIR_SAMPLE_IMAGES.split("/")[-1]+".txt"
-FILE_SAMPLE_VEC = DIR_SAMPLE_IMAGES+".vec"
+NEGATIVE_COLLECTION_PATH = NEGATIVE_IMAGE_DIR+"/"+NEGATIVE_IMAGE_DIR.split("/")[-1]+".txt"
+SAMPLE_COLLECTION_PATH = SAMPLE_IMAGES_DIR+"/"+SAMPLE_IMAGES_DIR.split("/")[-1]+".txt"
+VEC_SAMPLE_PATH = SAMPLE_IMAGES_DIR+".vec"
 
 if __name__=="__main__":
     (createSamples, createVec, trainCascade) = (False, False, False)
@@ -29,35 +29,30 @@ if __name__=="__main__":
         elif(opt in ("--trainCascade","-t")):
             trainCascade = True
 
-    # make sure output dir exists
-    if(not path.isdir(DIR_SAMPLE_IMAGES)):
-        makedirs(DIR_SAMPLE_IMAGES)
+    # переконуємось що директорія виводу існує
+    if(not path.isdir(SAMPLE_IMAGES_DIR)):
+        makedirs(SAMPLE_IMAGES_DIR)
 
-    # get list of negative images.
-    #
-    # this is equivalent to:
-    #     cd data/negative-tutorial-haartraining
-    #     ls -l1 *.jpg > negative-tutorial-haartraining.txt
-    negImageCollectionFile = open(FILE_NEG_COLLECTION, "w")
-    negImageFilenames = [f for f in listdir(DIR_NEG_IMAGES) if path.isfile(path.join(DIR_NEG_IMAGES,f)) and f.lower().endswith("jpg")]
-    for f in negImageFilenames:
-        negImageCollectionFile.write(f)
-        negImageCollectionFile.write("\n")
-    negImageCollectionFile.close()
+    # стоворюємо список негативних зображень
+    negativeCollectionFile = open(NEGATIVE_COLLECTION_PATH, "w")
+    negativeImagesNames = [f for f in listdir(NEGATIVE_IMAGE_DIR) if path.isfile(path.join(NEGATIVE_IMAGE_DIR,f)) and f.lower().endswith("jpg")]
+    for f in negativeImagesNames:
+        negativeCollectionFile.write(f)
+        negativeCollectionFile.write("\n")
+    negativeCollectionFile.close()
 
-    # get list of positive image files
-    posImageFilenames = [f for f in listdir(DIR_POS_IMAGES_CROPPED) if path.isfile(path.join(DIR_POS_IMAGES_CROPPED,f))]
+    # створюємо список позитивних зображень
+    positiveImagesNames = [f for f in listdir(IMAGE_POS_DIR_CROPPED) if path.isfile(path.join(IMAGE_POS_DIR_CROPPED,f))]
 
-    # createSamples: this creates a bunch of sample images
-    #     with images from DIR_POS_IMAGES_CROPPED on top of a negative image,
-    #     and its accompanying collection files
+    # createSamples: створення списку зображень-зразків
+    # із зображеннь з папки IMAGE_POS_DIR_CROPPED, накладених поверх негативних зображень,
     if(createSamples):
-        # run the create command for each image
-        for f in posImageFilenames:
+        # для кожного зображення запускаємо команду create
+        for f in positiveImagesNames:
             check_call(["opencv_createsamples",
-                "-img", path.join(DIR_POS_IMAGES_CROPPED,f),
-                "-bg", FILE_NEG_COLLECTION,
-                "-info", path.join(DIR_SAMPLE_IMAGES,sub("(?i)jpg","txt",f)),
+                "-img", path.join(IMAGE_POS_DIR_CROPPED,f),
+                "-bg", NEGATIVE_COLLECTION_PATH,
+                "-info", path.join(SAMPLE_IMAGES_DIR,sub("(?i)jpg","txt",f)),
                 "-num", "128",
                 "-maxxangle", "0.0",
                 "-maxyangle", "0.0",
@@ -68,69 +63,63 @@ if __name__=="__main__":
                 "-h", "48"])
             sleep(1)
 
-    # createVec: this creates a .vec file from the
-    #     positive sample images in the data/ directory.
-    #     if there are no positive samples in the data/ directory,
-    #     then it looks for some in the Training directory
+    # createVec: створення файлу .vec із
+    # позитивних зображень
+    # якщо немає позитивних зображень,
+    # то пошук відбувається у навчальній директорії
     if(createVec):
-        # get mega list of sample images
-        posImageCollectionFilenames = [f for f in listdir(DIR_SAMPLE_IMAGES) if path.isfile(path.join(DIR_SAMPLE_IMAGES,f)) and f.lower().endswith("txt")]
+        positiveImagesCollectionsNames = [f for f in listdir(SAMPLE_IMAGES_DIR) if path.isfile(path.join(SAMPLE_IMAGES_DIR,f)) and f.lower().endswith("txt")]
 
-        # if there are no collection files in data/ directory
-        #     and no overall collection file has been created,
-        #     then, copy clean images and collection file from Training directory
-        if((not posImageCollectionFilenames) and (not path.isfile(FILE_SAMPLE_COLLECTION))):
-            rmtree(DIR_SAMPLE_IMAGES)
-            copytree(DIR_POS_IMAGES, DIR_SAMPLE_IMAGES)
-            posImageCollectionFilenames = [f for f in listdir(DIR_SAMPLE_IMAGES) if path.isfile(path.join(DIR_SAMPLE_IMAGES,f)) and f.lower().endswith("txt")]
+        # якщо немає файлів колекції у директорії
+        # та не було створено колекції до того
+        # скопіювати чисті зразкові зображення у директорію навчання
+        if((not positiveImagesCollectionsNames) and (not path.isfile(SAMPLE_COLLECTION_PATH))):
+            rmtree(SAMPLE_IMAGES_DIR)
+            copytree(IMAGE_POS_DIR, SAMPLE_IMAGES_DIR)
+            positiveImagesCollectionsNames = [f for f in listdir(SAMPLE_IMAGES_DIR) if path.isfile(path.join(SAMPLE_IMAGES_DIR,f)) and f.lower().endswith("txt")]
 
-        # if no overall collection file has been created,
-        #     then, create one from all the collection files in posImageCollectionFilenames
+        # якщо немає файлів колекції у директорії - створити її
         #
-        # this is equivalent to:
+        # це еквівалент до:
         #     cd data/positive-clean-cropped-samples
         #     cat *.txt > positive-clean-cropped-samples.txt
         #     find . -name '*.txt' \! -name positive-clean-cropped-samples.txt -delete
-        if(not path.isfile(FILE_SAMPLE_COLLECTION)):
-            posImageCollectionFile = open(FILE_SAMPLE_COLLECTION, "w")
-            for f in posImageCollectionFilenames:
-                lines = open(path.join(DIR_SAMPLE_IMAGES,f), "r")
+        if(not path.isfile(SAMPLE_COLLECTION_PATH)):
+            posImageCollectionFile = open(SAMPLE_COLLECTION_PATH, "w")
+            for f in positiveImagesCollectionsNames:
+                lines = open(path.join(SAMPLE_IMAGES_DIR,f), "r")
                 for l in lines:
                     posImageCollectionFile.write(l)
                 lines.close()
-                remove(path.join(DIR_SAMPLE_IMAGES,f))
+                remove(path.join(SAMPLE_IMAGES_DIR,f))
             posImageCollectionFile.close()
 
         check_call(["opencv_createsamples",
-            "-info", FILE_SAMPLE_COLLECTION,
-            "-vec", FILE_SAMPLE_VEC,
-            "-bg", FILE_NEG_COLLECTION,
-            "-num", str(sum(1 for line in open(FILE_SAMPLE_COLLECTION))),
-            "-w", "48",
-            "-h", "48"])
+            "-info", SAMPLE_COLLECTION_PATH,
+            "-vec", VEC_SAMPLE_PATH,
+            "-bg", NEGATIVE_COLLECTION_PATH,
+            "-num", str(sum(1 for line in open(SAMPLE_COLLECTION_PATH))),
+            "-w", "40",
+            "-h", "40"])
         sleep(1)
 
-    # trainCascade: this trains the cascade with the .vec file in FILE_SAMPLE_VEC
+    # trainCascade: навчання каскаду
     if(trainCascade):
-        if(not path.isdir(DIR_HAAR_DATA)):
-            makedirs(DIR_HAAR_DATA)
+        if(not path.isdir(HAAR_MAIN_DIR)):
+            makedirs(HAAR_MAIN_DIR)
 
         check_call(["opencv_traincascade",
-            "-data", DIR_HAAR_DATA,
-            "-vec", FILE_SAMPLE_VEC,
-            "-bg", FILE_NEG_COLLECTION,
-            "-numPos", str(min(1000, sum(1 for line in open(FILE_SAMPLE_COLLECTION)))),
-            "-numNeg", str(min(600, sum(1 for line in open(FILE_NEG_COLLECTION)))),
+            "-data", HAAR_MAIN_DIR,
+            "-vec", VEC_SAMPLE_PATH,
+            "-bg", NEGATIVE_COLLECTION_PATH,
+            "-numPos", str(min(600, sum(1 for line in open(SAMPLE_COLLECTION_PATH)))),
+            "-numNeg", str(min(100, sum(1 for line in open(NEGATIVE_COLLECTION_PATH)))),
             "-numStages", "20",
-            "-precalcValBufSize", "1024",
-            "-precalcIdxBufSize", "1024",
+            "-precalcValBufSize", "768",
+            "-precalcIdxBufSize", "768",
             "-featureType", "HAAR",
-            "-w", "48",
-            "-h", "48",
-            "-minHitRate", "0.995",
-            "-maxFalseAlarmRate", "0.5"])
+            "-w", "40",
+            "-h", "40",
+            "-minHitRate", "0.95",
+            "-maxFalseAlarmRate", "0.6"])
         sleep(1)
-
-    #remove(FILE_NEG_COLLECTION)
-    #remove(FILE_SAMPLE_COLLECTION)
-    #rmtree(DIR_SAMPLE_IMAGES)
