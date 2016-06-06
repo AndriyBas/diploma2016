@@ -18,7 +18,7 @@ class VideoClassifier: public BaseClassifier {
     
 public:
     virtual void addFrame(DetectedResults detectedResults);
-    virtual void getVideoClass();
+    virtual std::string getVideoClass();
     
 private:
     std::vector<DetectedResults> cachedFrames;

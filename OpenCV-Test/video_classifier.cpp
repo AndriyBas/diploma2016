@@ -8,11 +8,39 @@
 
 #include "video_classifier.hpp"
 
+#include <set>
+
+const int CACHE_SIZE = 7;
 
 void VideoClassifier::addFrame(std::vector<DetectResult> detectedResults) {
-    
+    cachedFrames.push_back(detectedResults);
+    if (cachedFrames.size() > CACHE_SIZE) {
+        cachedFrames.erase(cachedFrames.begin());
+    }
 }
 
-void VideoClassifier::getVideoClass() {
+std::string VideoClassifier::getVideoClass() {
+
+    std::set<std::string> foundSet;
     
+    for (int i = 0; i < cachedFrames.size(); i++) {
+        
+        DetectedResults res = cachedFrames[i];
+        
+        for (int j = 0; j < res.size(); j++) {
+            DetectResult dr = res[j];
+            
+            foundSet.insert(std::string(dr.tag));
+        }
+    }
+    
+    bool b = foundSet.find("banana") != foundSet.end();
+    bool e = foundSet.find("face") != foundSet.end();
+    bool f = foundSet.find("elephant") != foundSet.end();
+    
+    if (b && e && f) {
+        return "zoo";
+    }
+    
+    return "-";
 }

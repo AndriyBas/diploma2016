@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include "base_detector.hpp"
 
-const cv::Size DETECT_DEFAULT_MIN_SIZE = cv::Size(30, 30);
+const cv::Size DETECT_DEFAULT_MIN_SIZE = cv::Size(100, 100);
 
 class Detector : public BaseDetector {
 

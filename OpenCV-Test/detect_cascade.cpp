@@ -30,6 +30,8 @@ DetectedResults DetectCascade::detect(cv::Mat image) {
         }
     }
     
+    
+    
     return result;
 }
 

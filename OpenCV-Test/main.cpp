@@ -20,13 +20,14 @@
 
 #include "detector.hpp"
 #include "detect_cascade.hpp"
+#include "video_classifier.hpp"
 
 //using namespace std;
 //using namespace cv;
 
 const std::string HAAR_CASCADES_PATH = "/Users/andriybas/Documents/study/OpenCV-Test/haarcascades/";
 
-const std::string FACE_DETECT_CLASSIFIER_PATH = HAAR_CASCADES_PATH + "haarcascade_frontalface_alt_tree.xml";
+const std::string FACE_DETECT_CLASSIFIER_PATH = HAAR_CASCADES_PATH + "haarcascade_frontalface_default.xml";
 const std::string PROFILE_FACE_DETECT_CLASSIFIER_PATH = HAAR_CASCADES_PATH + "haarcascade_profileface.xml";
 const std::string ELEPHANT_DETECT_CLASSIFIER_PATH =  HAAR_CASCADES_PATH + "elephant_classifier.xml";
 
@@ -38,9 +39,16 @@ const std::string BANANA_DETECT_CLASSIFIER_PATH =  HAAR_CASCADES_PATH + "banana_
 const int SKIP_COUNT = 2;
 
 
-const cv::Scalar DETECT_FRAME_COLOR = cv::Scalar( 255, 0, 255 );
+const cv::Scalar DETECT_FRAME_COLOR_MAGENTA = cv::Scalar( 255, 0, 255 );
+const cv::Scalar DETECT_FRAME_COLOR_YELLOW = cv::Scalar( 0, 255, 255 );
+const cv::Scalar DETECT_FRAME_COLOR_AQUA = cv::Scalar(255, 255, 0  );
+
+
+
+
 
 const cv::Scalar TEXT_COLOR = cv::Scalar( 0, 255, 0 );
+const cv::Scalar TEXT_COLOR_RED = cv::Scalar( 255, 0, 0 );
 
 
 const int DETECT_FRAME_THICKNESS = 2;
@@ -50,6 +58,7 @@ const cv::LineTypes DETECH_FRAME_LINE_TYPE = cv::LINE_AA;
 std::vector<cv::Rect> detectObjects(cv::Mat src, cv::CascadeClassifier classifier);
 void drawDetectedFrames(cv::Mat image, std::vector<DetectResult> objects);
 void drawTags(cv::Mat image, std::vector<DetectResult> objects);
+void drawClass(cv::Mat image, std::string videoClass);
 
 
 int main( )
@@ -84,6 +93,8 @@ int main( )
 
     // creating detectors
     Detector faceDetector(face_classifier, "face");
+    faceDetector.setScaleFactor(2);
+    
     Detector faceProfileDetector(profile_face_classifier, "face_profile");
     
     Detector elephantDetector(elephant_classifier, "elephant");
@@ -97,10 +108,12 @@ int main( )
     
     // init cascade
     DetectCascade detectCascade;
-//    detectCascade.addDetector(faceDetector);
+    detectCascade.addDetector(faceDetector);
 //    detectCascade.addDetector(faceProfileDetector);
     detectCascade.addDetector(elephantDetector);
-//    detectCascade.addDetector(bananaDetector);
+    detectCascade.addDetector(bananaDetector);
+    
+    VideoClassifier videoClassifier;
     
     DetectedResults detectedObjects;
     cv::Mat frame;
@@ -114,11 +127,16 @@ int main( )
         } else {
             frameCount = 0;
             detectedObjects = detectCascade.detect(frame);
+            videoClassifier.addFrame(detectedObjects);
         }
         
         drawDetectedFrames(frame, detectedObjects);
         
         drawTags(frame, detectedObjects);
+        
+        std::string videoClass = videoClassifier.getVideoClass();
+        
+        drawClass(frame, videoClass);
         
         imshow("Video classifier", frame );
         // Press 'c' to escape
@@ -129,16 +147,32 @@ int main( )
     return 0;
 }
 
+cv::Scalar selectColor(const char* tag) {
+    if (strcmp(tag, "elephant") == 0) {
+//        printf("selected AQUA\n");
+        return DETECT_FRAME_COLOR_AQUA;
+    } else if (strcmp(tag, "banana") == 0) {
+//        printf("selected YELLOW\n");
+        return DETECT_FRAME_COLOR_YELLOW;
+    } else {
+//        printf("selected MAGENTA\n");
+        return DETECT_FRAME_COLOR_MAGENTA;
+    }
+}
+
 void drawDetectedFrames(cv::Mat image, std::vector<DetectResult> detectedObjects) {
     // Draw circles on the detected faces
     for( int i = 0; i < detectedObjects.size(); i++ )
     {
-        
-        cv::rectangle(image, detectedObjects[i].rect, DETECT_FRAME_COLOR, DETECT_FRAME_THICKNESS, DETECH_FRAME_LINE_TYPE);
+        const char* tag = detectedObjects[i].tag;
+        cv::Rect rect = detectedObjects[i].rect;
+        printf("%s, %d, %d\n", tag, rect.width, rect.height);
+        cv::rectangle(image, detectedObjects[i].rect, selectColor(tag), DETECT_FRAME_THICKNESS, DETECH_FRAME_LINE_TYPE);
 //        cv::Point center( faces[i].x + faces[i].width * 0.5, faces[i].y + faces[i].height * 0.5 );
 //        cv::ellipse(image, center, cv::Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, DETECT_COLOR, 4, 8, 0 );
     }
 }
+
 
 void drawTags(cv::Mat image, std::vector<DetectResult> detectedObjects) {
     
@@ -149,10 +183,18 @@ void drawTags(cv::Mat image, std::vector<DetectResult> detectedObjects) {
         }
         tags.append(detectedObjects[0].tag);
     }
-    cv::putText(image, tags.c_str(), cv::Point(10, 20), CV_FONT_HERSHEY_PLAIN, 1.3, TEXT_COLOR, 1);
+    tags.insert(0, "tags: ");
+    cv::putText(image, tags.c_str(), cv::Point(10, 20), CV_FONT_HERSHEY_PLAIN, 1.3, TEXT_COLOR, 2);
     if (tags.length() > 0) {
         std::cout << "tags : " << tags << std::endl;
     }
+}
+
+void drawClass(cv::Mat image, std::string videoClass) {
+    
+    std::string txt = "class: " + videoClass;
+    cv::putText(image, txt.c_str(), cv::Point(10, 45), CV_FONT_HERSHEY_PLAIN, 1.5, TEXT_COLOR_RED, 2);
+    
 }
 
 

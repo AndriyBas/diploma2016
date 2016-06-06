@@ -13,6 +13,7 @@
 #include "opencv2/highgui/highgui.hpp"
 
 #include <stdio.h>
+#include <string.h>
 
 struct DetectResult {
     const char* tag;
@@ -33,7 +34,7 @@ class BaseClassifier {
     
 public:
     virtual void addFrame(DetectedResults detectedResults) = 0;
-    virtual void getVideoClass() = 0;
+    virtual std::string getVideoClass() = 0;
 };
 
 #endif /* base_video_classifier_hpp */
