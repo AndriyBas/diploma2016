@@ -1,57 +1,5 @@
 //
-//  detector.hpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/29/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
-
-#ifndef detector_hpp
-#define detector_hpp
-
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-
-#include <stdio.h>
-
-const cv::Size DETECT_DEFAULT_MIN_SIZE = cv::Size(30, 30);
-
-class Detector {
-
-public:
-    
-    // constructor
-    Detector(cv::CascadeClassifier classifier, const char* tag);
-    
-    // methods
-    std::vector<cv::Rect> detect(cv::Mat image);
-    const char* getTag();
-    void setMinSize(cv::Size size);
-    void setScaleFactor(int scale);
-    void setMinNeighbours(int n);
-
-private:
-    cv::CascadeClassifier cascadeClassifier;
-    const char* tag;
-    float scaleFactor = 1.1;
-    int minNeighbours = 3;
-    int flags = 0|CV_HAAR_SCALE_IMAGE;
-    cv::Size minSize = DETECT_DEFAULT_MIN_SIZE;
-
-};
-
-#endif /* detector_hpp */
-
-
-
-
-//
 //  detector.cpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/29/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
 
 #include "opencv2/imgproc.hpp"
 #include "detector.hpp"
@@ -66,13 +14,11 @@ Detector::Detector(cv::CascadeClassifier classifier, const char* tagArg) {
 std::vector<cv::Rect> Detector::detect(cv::Mat image) {
     
     // gray image
-    cv::Mat frame_gray;
-    
+    cv::Mat frame_gray; 
     // convert to gray image
     cv::cvtColor( image, frame_gray, cv::COLOR_BGR2GRAY );
     // Equalizes the histogram of a grayscale image.
     cv::equalizeHist( frame_gray, frame_gray );
-    
     // Detect objects
     std::vector<cv::Rect> objects;
     // run cascade
@@ -83,46 +29,44 @@ std::vector<cv::Rect> Detector::detect(cv::Mat image) {
                                        minNeighbours, // min neighbours
                                        flags, // flags
                                        minSize);
-    
     return objects;
 }
-
 const char* Detector::getTag() {
     return tag;
 }
-
 void Detector::setMinSize(cv::Size size) {
     minSize = size;
 }
-
 void Detector::setScaleFactor(int scale) {
     scaleFactor = scale;
 }
-
 void Detector::setMinNeighbours(int n) {
     minNeighbours = n;
 }
 
+//  base_detector.hpp
+#ifndef base_detector_hpp
+#define base_detector_hpp
 
+class BaseDetector {
+    
+public:
+    
+    // methods
+    virtual std::vector<cv::Rect> detect(cv::Mat image) = 0;
+    virtual const char* getTag() = 0;
+    virtual void setMinSize(cv::Size size) = 0;
+    virtual void setScaleFactor(int scale) = 0;
+    virtual void setMinNeighbours(int n) = 0;
+    
+};
 
-//
-//  detect_cascade.hpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/29/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
+#endif /* base_detector_hpp */
 
-#ifndef detect_cascade_hpp
-#define detect_cascade_hpp
+//  base_video_classifier.hpp
 
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-
-#include <stdio.h>
-
-#include "detector.hpp"
-
+#ifndef base_video_classifier_hpp
+#define base_video_classifier_hpp
 
 struct DetectResult {
     const char* tag;
@@ -138,6 +82,83 @@ struct DetectResult {
 };
 
 typedef std::vector<DetectResult> DetectedResults;
+
+class BaseClassifier {
+    
+public:
+    virtual void addFrame(DetectedResults detectedResults) = 0;
+    virtual std::string getVideoClass() = 0;
+};
+
+#endif /* base_video_classifier_hpp */
+
+//
+//  video_classifier.hpp
+//  OpenCV-Test
+//
+//  Created by Andriy Bas on 5/31/16.
+//  Copyright © 2016 Andriy Bas. All rights reserved.
+//
+
+#ifndef video_classifier_hpp
+#define video_classifier_hpp
+
+class VideoClassifier: public BaseClassifier {
+    
+public:
+    virtual void addFrame(DetectedResults detectedResults);
+    virtual std::string getVideoClass();
+    
+private:
+    std::vector<DetectedResults> cachedFrames;
+};
+
+
+#endif /* video_classifier_hpp */
+
+//  video_classifier.cpp
+
+const int CACHE_SIZE = 7;
+
+void VideoClassifier::addFrame(std::vector<DetectResult> detectedResults) {
+    cachedFrames.push_back(detectedResults);
+    if (cachedFrames.size() > CACHE_SIZE) {
+        cachedFrames.erase(cachedFrames.begin());
+    }
+}
+
+std::string VideoClassifier::getVideoClass() {
+
+    std::set<std::string> foundSet;
+    
+    for (int i = 0; i < cachedFrames.size(); i++) {
+        
+        DetectedResults res = cachedFrames[i];
+        
+        for (int j = 0; j < res.size(); j++) {
+            DetectResult dr = res[j];
+            
+            foundSet.insert(std::string(dr.tag));
+        }
+    }
+    bool b = foundSet.find("banana") != foundSet.end();
+    bool e = foundSet.find("elephant") != foundSet.end();
+    bool f = foundSet.find("face") != foundSet.end();
+    
+    if (b && e && f) {
+        return "zoo";
+    } else if (b && e) {
+        return "wild life";
+    }
+    
+    return "-";
+}
+
+//
+//  detect_cascade.hpp
+
+#ifndef detect_cascade_hpp
+#define detect_cascade_hpp
 
 class DetectCascade {
     
@@ -156,38 +177,26 @@ private:
 
 #endif /* detect_cascade_hpp */
 
-
-//
 //  detect_cascade.cpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/29/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
 
 #include "detect_cascade.hpp"
 
-// constructor
 DetectCascade::DetectCascade() {
-    // empty
 }
-
-
-// methods
 DetectedResults DetectCascade::detect(cv::Mat image) {
     
     std::vector<DetectResult> result;
     
     for (int i = 0; i < detectors.size(); i++) {
-        
         // detect all objects
         std::vector<cv::Rect> rects = detectors[i].detect(image);
-        
         // save result
         for (int j = 0; j < rects.size(); j++) {
             result.push_back(DetectResult(detectors[i].getTag(), rects[j]));
         }
     }
+    
+    
     
     return result;
 }
@@ -196,115 +205,39 @@ void DetectCascade::addDetector(Detector detector) {
     detectors.push_back(detector);
 }
 
-
-
-//
-//  video_classifier.hpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/31/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
-
-#ifndef video_classifier_hpp
-#define video_classifier_hpp
-
-#include <stdio.h>
-#include "detect_cascade.hpp"
-
-class VideoClassifier {
-    
-    
-public:
-    void addFrame(DetectedResults detectedResults);
-    void getVideoClass();
-    
-private:
-    std::vector<DetectedResults> cachedFrames;
-};
-
-
-#endif /* video_classifier_hpp */
-
-
-//
-//  video_classifier.cpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/31/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
-
-#include "video_classifier.hpp"
-
-
-void VideoClassifier::addFrame(std::vector<DetectResult> detectedResults) {
-    
-}
-
-void VideoClassifier::getVideoClass() {
-    
-}
-
-
-//
 //  main.cpp
-//  OpenCV-Test
-//
-//  Created by Andriy Bas on 5/9/16.
-//  Copyright © 2016 Andriy Bas. All rights reserved.
-//
-
-
-
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <opencv2/opencv.hpp>
-
-#include <iostream>
-#include <stdio.h>
-#include <unistd.h>
-#include <string>
 
 #include "detector.hpp"
 #include "detect_cascade.hpp"
+#include "video_classifier.hpp"
 
 //using namespace std;
 //using namespace cv;
 
-const std::string HAAR_CASCADES_PATH = "/Users/andriybas/Documents/study/OpenCV-Test/haarcascades/";
-
-const std::string FACE_DETECT_CLASSIFIER_PATH = HAAR_CASCADES_PATH + "haarcascade_frontalface_alt_tree.xml";
-const std::string PROFILE_FACE_DETECT_CLASSIFIER_PATH = HAAR_CASCADES_PATH + "haarcascade_profileface.xml";
+const std::string HAAR_CASCADES_PATH = "/Documents/study/OpenCV-Test/haarcascades/";
+const std::string FACE_DETECT_CLASSIFIER_PATH = HAAR_CASCADES_PATH + "haarcascade_frontalface_default.xml";
 const std::string ELEPHANT_DETECT_CLASSIFIER_PATH =  HAAR_CASCADES_PATH + "elephant_classifier.xml";
-
 const std::string BANANA_DETECT_CLASSIFIER_PATH =  HAAR_CASCADES_PATH + "banana_classifier.xml";
-
-
-
 
 const int SKIP_COUNT = 2;
 
-
-const cv::Scalar DETECT_FRAME_COLOR = cv::Scalar( 255, 0, 255 );
+const cv::Scalar DETECT_FRAME_COLOR_MAGENTA = cv::Scalar( 255, 0, 255 );
+const cv::Scalar DETECT_FRAME_COLOR_YELLOW = cv::Scalar( 0, 255, 255 );
+const cv::Scalar DETECT_FRAME_COLOR_AQUA = cv::Scalar(255, 255, 0  );
 
 const cv::Scalar TEXT_COLOR = cv::Scalar( 0, 255, 0 );
-
+const cv::Scalar TEXT_COLOR_RED = cv::Scalar( 255, 0, 0 );
 
 const int DETECT_FRAME_THICKNESS = 2;
 const cv::LineTypes DETECH_FRAME_LINE_TYPE = cv::LINE_AA;
 
-
 std::vector<cv::Rect> detectObjects(cv::Mat src, cv::CascadeClassifier classifier);
 void drawDetectedFrames(cv::Mat image, std::vector<DetectResult> objects);
 void drawTags(cv::Mat image, std::vector<DetectResult> objects);
-
+void drawClass(cv::Mat image, std::string videoClass);
 
 int main( )
 {
-    // init input video source
-    
     cv::VideoCapture captureInput(0);
     
     if (!captureInput.isOpened()) {
@@ -318,19 +251,18 @@ int main( )
     
     cv::namedWindow("window1", CV_WINDOW_AUTOSIZE);
     
-    
     int frameCount = 0;
 
     // loading classifiers
     cv::CascadeClassifier face_classifier(FACE_DETECT_CLASSIFIER_PATH);
-    cv::CascadeClassifier profile_face_classifier(PROFILE_FACE_DETECT_CLASSIFIER_PATH);
     cv::CascadeClassifier elephant_classifier(ELEPHANT_DETECT_CLASSIFIER_PATH);
     cv::CascadeClassifier banana_classifier(BANANA_DETECT_CLASSIFIER_PATH);
 
-
     // creating detectors
     Detector faceDetector(face_classifier, "face");
-    Detector faceProfileDetector(profile_face_classifier, "face_profile");
+    faceDetector.setScaleFactor(2);
+    
+//    Detector faceProfileDetector(profile_face_classifier, "face_profile");
     
     Detector elephantDetector(elephant_classifier, "elephant");
     elephantDetector.setScaleFactor(3);
@@ -343,13 +275,17 @@ int main( )
     
     // init cascade
     DetectCascade detectCascade;
-//    detectCascade.addDetector(faceDetector);
-//    detectCascade.addDetector(faceProfileDetector);
-//    detectCascade.addDetector(elephantDetector);
+    detectCascade.addDetector(faceDetector);
+    detectCascade.addDetector(elephantDetector);
     detectCascade.addDetector(bananaDetector);
+    
+    VideoClassifier videoClassifier;
     
     DetectedResults detectedObjects;
     cv::Mat frame;
+    
+    long totalTime = 0;
+    int detectedFrames = 0;
     
     while(true)
     {
@@ -359,47 +295,42 @@ int main( )
             frameCount++;
         } else {
             frameCount = 0;
+            
+            std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+            
             detectedObjects = detectCascade.detect(frame);
+            
+            std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+            
+            totalTime += duration;
+            detectedFrames++;
+            
+            videoClassifier.addFrame(detectedObjects);
         }
         
         drawDetectedFrames(frame, detectedObjects);
         
         drawTags(frame, detectedObjects);
         
+        std::string videoClass = videoClassifier.getVideoClass();
+        
+        drawClass(frame, videoClass);
+        
         imshow("Video classifier", frame );
-        // Press 'c' to escape
-//        if(waitKey(1) == 'c') break;
+    
+        if (detectedFrames > 100) {
+            std::cout << "Average frame detect: " << 1.0 * totalTime / detectedFrames << "\n";
+            
+            detectedFrames = 0;
+            totalTime = 0;
+        }
     }
     
     cv::waitKey(0);
     return 0;
 }
 
-void drawDetectedFrames(cv::Mat image, std::vector<DetectResult> detectedObjects) {
-    // Draw circles on the detected faces
-    for( int i = 0; i < detectedObjects.size(); i++ )
-    {
-        
-        cv::rectangle(image, detectedObjects[i].rect, DETECT_FRAME_COLOR, DETECT_FRAME_THICKNESS, DETECH_FRAME_LINE_TYPE);
-//        cv::Point center( faces[i].x + faces[i].width * 0.5, faces[i].y + faces[i].height * 0.5 );
-//        cv::ellipse(image, center, cv::Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, DETECT_COLOR, 4, 8, 0 );
-    }
-}
-
-void drawTags(cv::Mat image, std::vector<DetectResult> detectedObjects) {
-    
-    std::string tags = "";
-    for (int i = 0; i < detectedObjects.size(); i++) {
-        if (tags.length() > 0) {
-            tags.append(", ");
-        }
-        tags.append(detectedObjects[0].tag);
-    }
-    cv::putText(image, tags.c_str(), cv::Point(10, 20), CV_FONT_HERSHEY_PLAIN, 1.3, TEXT_COLOR, 1);
-    if (tags.length() > 0) {
-        std::cout << "tags : " << tags << std::endl;
-    }
-}
 
 
 
